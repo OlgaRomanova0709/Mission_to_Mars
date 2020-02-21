@@ -1,5 +1,6 @@
 from splinter import Browser
 from bs4 import BeautifulSoup
+import pandas as pd
 
 
 def init_browser():
@@ -25,33 +26,31 @@ def scrape_news():
 
     return news
 
+
 def scrape_featured():
     browser = init_browser()
     featured = {}
 
-    url = 'https://www.jpl.nasa.gov/spaceimages/details.php?id=PIA19913'
+    url = 'https://www.jpl.nasa.gov/spaceimages/?search=&category=Mars'
     browser.visit(url)
 
-    html = browser.html
-    soup = BeautifulSoup(html, "html.parser")
-    
-    img_ref=soup.find('figure', class_="lede").a['href']
+    #Click the button ('full_image')
+    full_image_elem=browser.find_by_id('full_image')
+    full_image_elem.click()
+
+    #Click the button ('more info')
+    browser.is_element_present_by_text("more info", wait_time=0.5)
+    more_info_elem=browser.find_link_by_partial_text('more info')
+    more_info_elem.click()
+
+    #Getting the new html from current page
+    html=browser.html
+    current=BeautifulSoup(html,'html.parser')
+
+    img_ref=current.find('figure', class_="lede").a['href']
     featured['img']=f"https://www.jpl.nasa.gov{img_ref}"
-    return featured
-
-def scrape_weather():
-    browser = init_browser()
-    weather_news = {}
-
-    url="https://twitter.com/marswxreport?lang=en"
-    browser.visit(url)
-
-    html = browser.html
-    soup = BeautifulSoup(html, "html.parser")
     
-    weather=soup.find_all('div',class_="js-tweet-text-container")[0]
-    weather_news['inf']=weather.find('p').text
-    return weather_news
+    return featured
 
 def scrape_hemi():
     browser = init_browser()
@@ -80,21 +79,12 @@ def scrape_hemi():
     return hemi_list
 
 def scrape_table():
-    browser = init_browser()
+    tableD={}
     url="https://space-facts.com/mars/"
-    browser.visit(url)
-    html = browser.html
+    df = pd.read_html(url)[0] #table itself
+    df.columns = ["Mars Facts", "value"]
+    tt=df.to_html(index=False)
+    tableD['facts']=df.to_html(index=False)
 
-    soup = BeautifulSoup(html, "html.parser")
-    one=soup.find_all("div", class_="textwidget")[3].table.tbody
-    table_inf=one.find_all('tr')
-    table_mars=[]
-    for i in table_inf:
-        dict_mars={}
-        dict_mars['title']=i.find_all('td')[0].text
-        dict_mars['value']=i.find_all('td')[1].text
-        table_mars.append(dict_mars)
-
-
-    return table_mars
+    return tableD
 

@@ -34,19 +34,10 @@
           <img src="{{ featured.img }}" width="600" height=400 alt="img">
         </div>
         <div class="col-sm-4">
-          <div class="box visualisation-total">
-            <h6>Current Weather on Mars</h6>
-            <p>{{weather_news.inf}}</p>
-            <h3>Mars Facts (Value)</h3>
-            <table border="1">
-              {% for j in table_mars %}
-              <tr>          
-                <td>{{ j.title }}</td>
-                <td>{{ j.value }}</td>
-              </tr>
-              {% endfor %}
-            </table>
-          </div>
+          <h4>Mars Facts</h4>
+          <p>{{tableD.facts | safe}}</p>
+          
+          
         </div>
       </div>
     </div>  
